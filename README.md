@@ -5,7 +5,7 @@ Supports Criterion 1 (Prompt design and iteration). Linked from the submitted re
 
 See [PROMPT-LIBRARY.md](./PROMPT-LIBRARY.md) for the full 10-prompt library this log tests.
 
-This log documents the design-test-refine cycle for the prompts in the library where meaningful iteration occurred. Each entry shows the actual prompt tested, what went wrong, and the lesson that shaped the next version.
+This log documents the design-test-refine cycle for the prompts in the library where meaningful iteration occurred. Every prompt is built on the RACE framework (Role, Action, Context, Expected output; adapted from AIPromptsX, 2025). Each entry below shows the actual prompt tested, what went wrong, and the lesson that shaped the next version.
 
 ---
 
@@ -60,10 +60,22 @@ The same failure pattern appeared independently in the v1 (unconstrained) versio
 
 ---
 
+## Responsible AI Considerations
+
+This library was designed against five risk categories, drawing on NIST's Generative AI Risk Management Profile (NIST, 2024):
+
+- **Hallucination / confabulation** — the primary risk found through testing (see Cross-Cutting Finding above). Mitigated through explicit "state uncertainty" and "use only case-record facts" instructions, verified by manual testing on three prompts.
+- **Bias** — prompts that touch subjective or consequential judgement (e.g. Credit Application Summary) are deliberately restricted to factual summarisation only — they never make or recommend a decision, so bias in the underlying model cannot directly drive a real outcome. This follows the general caution in Bender et al. (2021) that large language models can reproduce biases present in their training data when used for consequential judgements.
+- **Privacy** — prompts handling customer or financial data (e.g. Credit Application Summary, Complaint Response Draft) are scoped to use only data already held in the business's own records, and do not request or output data beyond what each task needs.
+- **Security** — no prompt stores, logs, or transmits data outside the immediate task; every output is a draft reviewed by staff before use, limiting the impact of any single incorrect or manipulated output.
+- **Governance** — every prompt keeps a human decision-maker at the point of consequence (sending, approving, deciding), consistent with NIST's recommendation that human oversight sit at the highest-risk points of a GenAI-enabled workflow.
+
 ## Note
 
 Prompts 2, 4–7, 9–10 followed the same design-test-refine cycle at a smaller scale (1–2 revisions each, converging on explicit roles, required fields, and output constraints). Full test transcripts available on request.
 
 **References**
 
+- AIPromptsX. (2025). *RACE framework: Role-aligned contextual expertise*. https://aipromptsx.com/prompts/frameworks/race
+- Bender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? *ACM Conference on Fairness, Accountability, and Transparency* (pp. 610–623).
 - National Institute of Standards and Technology. (2024). *Artificial intelligence risk management framework: Generative artificial intelligence profile* (NIST-AI-600-1). https://doi.org/10.6028/NIST.AI.600-1
