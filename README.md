@@ -3,6 +3,8 @@
 **Assessment 1 portfolio evidence (BUS4005-T5-W)**
 Supports Criterion 1 (Prompt design and iteration). Linked from the submitted report.
 
+See [PROMPT-LIBRARY.md](./PROMPT-LIBRARY.md) for the full 10-prompt library this log tests.
+
 This log documents the design-test-refine cycle for the prompts in the library where meaningful iteration occurred. Each entry shows the actual prompt tested, what went wrong, and the lesson that shaped the next version.
 
 ---
@@ -61,3 +63,7 @@ The same failure pattern appeared independently in the v1 (unconstrained) versio
 ## Note
 
 Prompts 2, 4–7, 9–10 followed the same design-test-refine cycle at a smaller scale (1–2 revisions each, converging on explicit roles, required fields, and output constraints). Full test transcripts available on request.
+
+**References**
+
+- National Institute of Standards and Technology. (2024). *Artificial intelligence risk management framework: Generative artificial intelligence profile* (NIST-AI-600-1). https://doi.org/10.6028/NIST.AI.600-1
