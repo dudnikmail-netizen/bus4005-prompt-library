@@ -41,19 +41,23 @@ This log documents the design-test-refine cycle for the prompts in the library w
 
 ## Prompt 8: Complaint Response Draft
 
-*Design and rationale below; manual model verification pending — will be updated once tested.*
+**Testing method:** each version tested in a fresh chat on Claude Sonnet 5 (Anthropic), 15 September 2026.
 
 | Version | Change made | Prompt text | Observed effect | Lesson learned |
 |---|---|---|---|---|
-| v1 | Baseline, tone-only constraints | "Draft an empathetic reply: acknowledge the issue, avoid admitting liability, offer next steps, under 100 words." | Hard test case: a delayed order with an urgent deadline and an open refund request. The draft invented specifics nowhere in the case record — a "4-hour specialist callback," a named refund window of "3–7 business days," and self-service action codes like "EXPEDITE." | Tone and liability constraints alone don't stop fabrication — an ungrounded prompt will invent plausible-sounding commitments to sound helpful. |
-| v2 (final) | Added explicit grounding rule | "Draft an empathetic reply using only case-record facts; never invent timeframes, compensation or commitments; under 100 words." | Same hard case: reply now states only what's recorded (delayed, no confirmed date, refund not yet approved, human review required) and explicitly avoids promising a timeframe or process not on file. | Naming the failure mode directly ("never invent timeframes, compensation or commitments") is more reliable than general instructions like "be accurate" — consistent with NIST's confabulation guidance (NIST, 2024). |
+| v1 | Baseline, tone-only constraints | "Draft an empathetic reply: acknowledge the issue, avoid admitting liability, offer next steps, under 100 words." | Tested with a hard case (delayed order, urgent deadline, open refund request). Did not invent hard numbers, but used bracket placeholders for unknowns (`[X hours]` for a follow-up window, `[Customer Name]`, `[Your Name]`), asserted an action not on the case record ("I've escalated your order for urgent tracking"), and ended by asking whether a firmer commitment or a different version was wanted — not a finished, sendable message. | The same pattern seen in Prompts 1 and 3's v1: an unconstrained prompt doesn't necessarily fabricate facts — it produces a polished draft with placeholders and open questions instead of one deployable output. |
+| v2 (final) | Added explicit grounding rule | "Draft an empathetic reply using only case-record facts; never invent timeframes, compensation or commitments; under 100 words." | Same hard case: produced one complete, ready-to-send message with no placeholders and no follow-up question. Stated only recorded facts (delayed, no confirmed date, refund requested, escalating for human review) and made no promise about timing. | The grounding rule fixed two things at once — no invented specifics, and no leftover choices for a human to resolve — confirming the single-output-format lesson from Prompt 1 generalises across the library, not just one prompt. |
+
+*See `/evidence` folder for screenshots of both test runs.*
+
+---
+
+## Cross-Cutting Finding
+
+The same failure pattern appeared independently in the v1 (unconstrained) version of all three tested prompts: Delivery Status Alert v1 returned two draft options with placeholders; Inquiry Triage v1 didn't attempt a category at all and offered further help instead; Complaint Response Draft v1 used bracket placeholders and asked which version was preferred. **None of the three fabricated hard facts.** In every case, the fix was the same: an explicit single-output-format constraint, not a request for "accuracy." This suggests the constraint that matters most for turning a capable model into an automation-ready one isn't primarily about truthfulness — it's about eliminating the model's default habit of leaving a human to finish or choose.
 
 ---
 
 ## Note
 
 Prompts 2, 4–7, 9–10 followed the same design-test-refine cycle at a smaller scale (1–2 revisions each, converging on explicit roles, required fields, and output constraints). Full test transcripts available on request.
-
-**References**
-
-- National Institute of Standards and Technology. (2024). *Artificial intelligence risk management framework: Generative artificial intelligence profile* (NIST-AI-600-1). https://doi.org/10.6028/NIST.AI.600-1
