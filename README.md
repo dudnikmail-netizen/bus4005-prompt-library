@@ -11,15 +11,21 @@ This log documents the design-test-refine cycle for the prompts in the library w
 
 **Grounded in real dispatch practice:** delays were communicated by phone or email from the dispatch team, but updates often left out a firm new date, the actual reason (stock shortage, freight delay, mill backorder), or any indication of what happens next — leaving customers to chase the answer themselves.
 
+**Testing method:** each version tested in a fresh chat (no shared context between versions) on Claude Sonnet 5 (Anthropic), 15 September 2026, against the same case: order BM-7734, mill backorder, no confirmed new date.
+
 | Version | Change made | Prompt text | Observed effect | Lesson learned |
 |---|---|---|---|---|
-| v1 | Baseline, no structure | "Write a message telling the customer their delivery is late." | Vague and inconsistent; frequently omitted the order ID and gave no reason at all. | Needs an explicit role, required fields, and a format constraint. |
-| v2 | Added role + required fields | "You are a logistics assistant. Write a status update including order ID, status, and new time." | Fields were present when the data existed — but tested against a mill-backorder case with no confirmed date, the model either invented a plausible-sounding date or dropped that line silently. | Requiring a field doesn't stop fabrication when the honest answer is "we don't know yet." |
-| v3 (final) | Added explicit reason categories + "state uncertainty" fallback | "You are a logistics/dispatch assistant. Given order ID, status, reason (stock shortage, freight delay, or mill backorder), and new time window, write a plain-language update under 60 words. If no new date is confirmed yet, say so explicitly rather than omitting it." | Hard test case (mill backorder, no confirmed date): correctly stated "a new delivery date hasn't been confirmed yet" instead of guessing or going silent. 6/6 test runs (backorder / freight delay / on-time): no fabricated dates, consistent tone. | The real fix wasn't more required fields — it was an explicit instruction for what to do when the honest answer is "unknown." |
+| v1 | Baseline, no structure | "Write a message telling the customer their delivery is late." | Correctly did **not** invent a date. But returned two alternative drafts (A/B options), formatted as a full email with a subject line and `[Customer Name]`/`[Your Name]` placeholders — needs a person to pick one and finish it. | An unscoped prompt can be accurate and still be unusable for automation: it hands back a menu of polished choices instead of one finished, sendable artifact. |
+| v2 | Added role + required fields | "You are a logistics assistant. Write a status update including order ID, status, and new time." | Correctly stated the date as unconfirmed and included all required fields cleanly. But it ended by asking which format the user wanted (email / internal note / casual message) — still not a finished output. | Requiring fields fixes content completeness, but without an explicit output-format constraint the model treats the task as a menu of options rather than a deliverable. |
+| v3 (final) | Added single-output format constraint + word limit + uncertainty fallback | "You are a logistics/dispatch assistant. Given order ID, status, reason (stock shortage, freight delay, or mill backorder), and new time window, write a plain-language update under 60 words. If no new date is confirmed yet, say so explicitly rather than omitting it." | Produced exactly one complete, ready-to-send message — no placeholders, no options, no follow-up question — and correctly stated the new date was unconfirmed. | The decisive fix wasn't preventing hallucination — the model never fabricated a date, at any version. It was forcing a single, deterministic, complete output. Even a well-behaved model defaults to offering humans choices unless the prompt explicitly rules that out, which defeats the purpose of automation. |
+
+*See `/evidence` folder for screenshots of all three test runs.*
 
 ---
 
 ## Prompt 3: Inquiry Triage
+
+*Design and rationale below; manual model verification pending — will be updated once tested.*
 
 | Version | Change made | Prompt text | Observed effect | Lesson learned |
 |---|---|---|---|---|
@@ -32,6 +38,8 @@ This log documents the design-test-refine cycle for the prompts in the library w
 ---
 
 ## Prompt 8: Complaint Response Draft
+
+*Design and rationale below; manual model verification pending — will be updated once tested.*
 
 | Version | Change made | Prompt text | Observed effect | Lesson learned |
 |---|---|---|---|---|
